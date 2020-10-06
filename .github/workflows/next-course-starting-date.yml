@@ -1,0 +1,16 @@
+# use a scheduled trigger instead of a push
+on: push
+jobs:
+  next-course-starting-date:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          START_DAY=`ncal -m $(($(date +%m) + 1)) -M | grep Mo | tr ' ' '\n' | grep -v ^$ | sed -n '2p'`
+          FORMATTED_DATE=`date -d "$(date +%Y-%m-$START_DAY) 1 month" '+%A %-d %B, %Y.'`
+          echo -e "# Next course starting date:\n$FORMATTED_DATE\n" > next-course-starting-date.md
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "update next-course-starting-date.md"
+          git push
